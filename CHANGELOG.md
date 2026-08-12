@@ -16,4 +16,5 @@ Dependency bumps and internal-only changes are out of scope.
 - Contribute a terminal profile so the same thing is available from the terminal dropdown.
 - Read the encoding list from `luit -list` at runtime instead of hard-coding one.
 - Settings for the `luit` path, default encoding, wrapped shell and its arguments.
+- `luit.env` for setting environment variables (notably `LANG`) on these terminals: `luit` does not change the shell's locale, so the shell must already emit the selected encoding.
 - Japanese localization.

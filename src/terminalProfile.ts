@@ -70,6 +70,7 @@ export async function prepareLuitTerminal(
     luitPath: location.path,
     encoding,
     shell,
+    env: config.get<Record<string, string | null>>("env", {}),
   });
   deps.diagnostics.log(
     `Launching: ${options.shellPath} ${options.shellArgs.join(" ")}`,
@@ -98,6 +99,9 @@ async function pickEncoding(
     return defaultEncoding;
   }
 
+  const rememberLast = config.get<boolean>("rememberLastEncoding", true);
+  const lastEncoding = rememberLast ? deps.state.getLastEncoding() : undefined;
+
   const list = await deps.encodingCache.get(luitPath);
   if (!list.ok) {
     // 一覧を取れなくても、エンコーディング名さえ分かっていれば起動はできる。
@@ -108,12 +112,10 @@ async function pickEncoding(
       prompt: vscode.l10n.t(
         "Could not read the encoding list from luit. Enter an encoding name (for example eucJP).",
       ),
-      value: deps.state.getLastEncoding() ?? "",
+      value: lastEncoding ?? "",
     });
   }
 
-  const rememberLast = config.get<boolean>("rememberLastEncoding", true);
-  const lastEncoding = rememberLast ? deps.state.getLastEncoding() : undefined;
   const items = buildQuickPickItems(list.encodings, lastEncoding);
 
   const selected = await vscode.window.showQuickPick(items, {

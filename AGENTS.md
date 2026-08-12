@@ -10,6 +10,8 @@ vscode-luitは単一パッケージのTypeScript製VS Code拡張機能。`luit`�
 - **`provideTerminalProfile`から中止するときは、メッセージが空のエラーを投げる**(`SilentCancellation`、`src/terminalProfile.ts`)。`undefined`を返すとVS Codeが`No terminal profile options provided for id "..."`を投げ、それが`createContributedTerminalProfile`の`catch`で`notificationService.error(error.message)`に渡ってエラー通知になる。QuickPickをEscしても`token`はキャンセルされないので、これは通常操作で踏む。`CancellationError`でも解決しない: 通知側に渡るのはErrorではなく`message`の文字列で、`isCancellationError`はErrorのインスタンスにしか真にならないため、"Canceled"がそのまま表示される。通知の生成条件`if (!message || isCancellationError(message)) return;`のうち、実際に効くのは`!message`だけ(VS Code 1.133.0のバンドルで確認)
 - **shell integrationは効かない**。VS Codeは実行ファイルのbasenameを`bash`/`fish`/`pwsh`/`zsh`と照合して統合スクリプトを注入するため、`luit`では発動しない。将来的には`shellIntegrationNonce`(VS Code 1.104+)で迂回できるが、`engines.vscode`を大きく上げることになる
 - **`extensionKind: ["workspace"]`は意図的**。Remote-SSH/WSL/Dev Container接続時に拡張機能ホストがリモート側で動くことで、`luit`の探索もターミナルの起動もリモート側で行われる。これがこの拡張機能の主用途であり、バイナリを同梱しなくて済む理由でもある
+- **プロファイルの`title`は意図的にローカライズしていない**。`terminal.integrated.defaultProfile.*`は`contributedProfiles.find(p => p.title === 設定値)`で照合する(1.74.0/1.133.0の両方で確認)。翻訳すると、ユーザーがsettings.jsonに書くべき値が表示言語によって変わってしまう
+- **luitはシェルのロケールを変更しない**。`-encoding eucJP`を指定しても子プロセスの`LANG`はそのまま。シェルがUTF-8を出力する設定のままだと文字化けするため、`luit.env`で`LANG`を渡せるようにしてある
 - **エンコーディング一覧はハードコードしない**。`luit -list`の「Known locale encodings:」セクションを実行時に解析する。「Known charsets」以降は文字集合であってエンコーディングではないので取り込まないこと(`luit -encoding`に渡すと失敗する)
 
 ## CHANGELOG.md

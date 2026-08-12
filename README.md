@@ -19,7 +19,7 @@ sudo pacman -S luit       # Arch Linux
 
 Run **luit: Open Terminal...** from the Command Palette, pick an encoding, and a terminal opens with that encoding translated to UTF-8.
 
-The same thing is available as a terminal profile: click the dropdown arrow next to the terminal `+` button and choose **luit (choose encoding)**.
+The same thing is available as a terminal profile: click the dropdown arrow next to the terminal `+` button and choose **luit**.
 
 Either way the extension launches the equivalent of:
 
@@ -29,15 +29,28 @@ luit -encoding eucJP -- bash --login
 
 The encoding list is read from `luit -list` at runtime, so it always matches what your `luit` actually supports.
 
+### The shell's locale has to match
+
+`luit` translates whatever the shell writes, from the encoding you picked into UTF-8. It does **not** change the shell's locale — the shell has to already be emitting that encoding.
+
+On a host whose `LANG` is `ja_JP.eucJP` this just works, which is the case this extension was built for. If your shell emits UTF-8 while `luit` is told to expect EUC-JP, everything comes out as mojibake. Set `LANG` for these terminals when that happens:
+
+```jsonc
+"luit.env": { "LANG": "ja_JP.eucJP" }
+```
+
+The locale has to exist on that machine (`locale -a` lists the installed ones).
+
 ## Settings
 
-| Setting                     | Default       | Description                                                   |
-| --------------------------- | ------------- | ------------------------------------------------------------- |
-| `luit.luitPath`             | `""`          | Path to the `luit` executable. Empty searches `PATH`.         |
-| `luit.defaultEncoding`      | `""`          | Use this encoding without prompting. Empty asks every time.   |
-| `luit.shellPath`            | `""`          | Shell to run inside `luit`. Empty uses `$SHELL`, then `bash`. |
-| `luit.shellArgs`            | `["--login"]` | Arguments passed to that shell.                               |
-| `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.         |
+| Setting                     | Default       | Description                                                               |
+| --------------------------- | ------------- | ------------------------------------------------------------------------- |
+| `luit.luitPath`             | `""`          | Path to the `luit` executable. Empty searches `PATH`.                     |
+| `luit.defaultEncoding`      | `""`          | Use this encoding without prompting. Empty asks every time.               |
+| `luit.shellPath`            | `""`          | Shell to run inside `luit`. Empty uses `$SHELL`, then `bash`.             |
+| `luit.shellArgs`            | `["--login"]` | Arguments passed to that shell.                                           |
+| `luit.env`                  | `{}`          | Environment variables for the terminal. Use it to set `LANG` (see above). |
+| `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.                     |
 
 All settings are `machine-overridable`: `luit`'s location and your shell depend on which machine you are connected to, so they are configured per machine (per remote), not synced across them.
 
@@ -46,9 +59,11 @@ All settings are `machine-overridable`: `luit`'s location and your shell depend 
 To make every terminal go through `luit`, point the default profile at it **and** set an encoding — otherwise you get an encoding picker every time a terminal opens, including on window restore:
 
 ```jsonc
-"terminal.integrated.defaultProfile.linux": "luit (choose encoding)",
+"terminal.integrated.defaultProfile.linux": "luit",
 "luit.defaultEncoding": "eucJP"
 ```
+
+`defaultProfile` matches contributed profiles by their displayed title, so this profile is deliberately named `luit` in every UI language — otherwise the value you have to type here would change with your display language.
 
 ## Known limitations
 

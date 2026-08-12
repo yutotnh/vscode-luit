@@ -6,6 +6,15 @@ export interface BuildLuitTerminalOptionsInput {
   luitPath: string;
   encoding: string;
   shell: ShellSpec;
+  /**
+   * ターミナルに渡す環境変数
+   *
+   * luitは子プロセスのロケールを変更しない。`-encoding eucJP`を指定しても
+   * シェル側の`LANG`はそのままなので、シェルがUTF-8を出力する設定のままだと
+   * luitはそれをEUC-JPとして解釈してしまい文字化けする。
+   * そのため`LANG`を合わせられるようにしてある
+   */
+  env?: Readonly<Record<string, string | null>>;
 }
 
 /** `vscode.window.createTerminal`と`vscode.TerminalProfile`の双方に渡せる形 */
@@ -13,6 +22,7 @@ export interface LuitTerminalOptions {
   name: string;
   shellPath: string;
   shellArgs: string[];
+  env?: Record<string, string | null>;
 }
 
 /**
@@ -34,11 +44,18 @@ export interface LuitTerminalOptions {
 export function buildLuitTerminalOptions(
   input: BuildLuitTerminalOptionsInput,
 ): LuitTerminalOptions {
-  const { luitPath, encoding, shell } = input;
+  const { luitPath, encoding, shell, env } = input;
 
-  return {
+  const options: LuitTerminalOptions = {
     name: `${path.basename(shell.path)} (${encoding} via luit)`,
     shellPath: luitPath,
     shellArgs: ["-encoding", encoding, "--", shell.path, ...shell.args],
   };
+
+  // exactOptionalPropertyTypes のため、指定があるときだけenvを持たせる
+  if (env && Object.keys(env).length > 0) {
+    options.env = { ...env };
+  }
+
+  return options;
 }

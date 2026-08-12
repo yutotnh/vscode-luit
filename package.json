@@ -51,7 +51,7 @@
       "profiles": [
         {
           "id": "luit.profile",
-          "title": "%luit.profile.title%",
+          "title": "luit",
           "icon": "terminal"
         }
       ]
@@ -87,6 +87,18 @@
           ],
           "scope": "machine-overridable",
           "markdownDescription": "%luit.shellArgs.markdownDescription%"
+        },
+        "luit.env": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "default": {},
+          "scope": "machine-overridable",
+          "markdownDescription": "%luit.env.markdownDescription%"
         },
         "luit.rememberLastEncoding": {
           "type": "boolean",

@@ -32,6 +32,14 @@ updates:
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
 
+      # NOTE: mochaは意図的にignoreしていない。mochaはExtension Host内で動くため
+      # Node.jsのfloorは.nvmrcでなく最古対応VS Code(1.74.0がバンドルするElectron 19の
+      # Node.js v16.14.2)基準だが、mocha 11のengines.nodeは>=18.18でこれを満たさない。
+      # ただしmochaはdist/に含まれないdevDependencyで、enginesはインストール時の警告に
+      # 過ぎない。ignoreはセキュリティ更新PRも止めてしまうため、その代償の方が大きいと
+      # 判断した。実行時の担保は`test-minimum-vscode-version` CI(1.74.0、3OS)。
+      # ここが赤くなったら見直す。
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

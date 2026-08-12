@@ -27,7 +27,13 @@ export function registerCommands(
       if (result.kind !== "ok") {
         return;
       }
-      vscode.window.createTerminal(result.options).show();
+      // プロファイル経由(package.jsonの`icon`)と見た目を揃える
+      vscode.window
+        .createTerminal({
+          ...result.options,
+          iconPath: new vscode.ThemeIcon("terminal"),
+        })
+        .show();
     }),
 
     vscode.commands.registerCommand(REFRESH_ENCODINGS_COMMAND, async () => {
