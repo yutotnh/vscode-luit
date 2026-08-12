@@ -1,0 +1,75 @@
+# luit
+
+Open VS Code integrated terminals that speak legacy encodings — EUC-JP, Shift_JIS, Big5, KOI8-R and anything else [luit](https://invisible-island.net/luit/) supports.
+
+`xterm.js`, which powers the VS Code integrated terminal, [only speaks UTF-8](https://xtermjs.org/docs/guides/encoding/#legacy-encodings) and recommends a transcoder such as `luit` for everything else. This extension runs that transcoder for you.
+
+## Requirements
+
+- The extension host must run on Linux — local Linux, Remote - SSH, WSL, or a Dev Container.
+- `luit` must be installed **on the machine where the extension host runs**. Over Remote - SSH that is the remote host, not your laptop.
+
+```bash
+sudo apt install luit     # Debian / Ubuntu
+sudo dnf install luit     # Fedora / RHEL
+sudo pacman -S luit       # Arch Linux
+```
+
+## Usage
+
+Run **luit: Open Terminal...** from the Command Palette, pick an encoding, and a terminal opens with that encoding translated to UTF-8.
+
+The same thing is available as a terminal profile: click the dropdown arrow next to the terminal `+` button and choose **luit (choose encoding)**.
+
+Either way the extension launches the equivalent of:
+
+```bash
+luit -encoding eucJP -- bash --login
+```
+
+The encoding list is read from `luit -list` at runtime, so it always matches what your `luit` actually supports.
+
+## Settings
+
+| Setting                     | Default       | Description                                                   |
+| --------------------------- | ------------- | ------------------------------------------------------------- |
+| `luit.luitPath`             | `""`          | Path to the `luit` executable. Empty searches `PATH`.         |
+| `luit.defaultEncoding`      | `""`          | Use this encoding without prompting. Empty asks every time.   |
+| `luit.shellPath`            | `""`          | Shell to run inside `luit`. Empty uses `$SHELL`, then `bash`. |
+| `luit.shellArgs`            | `["--login"]` | Arguments passed to that shell.                               |
+| `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.         |
+
+All settings are `machine-overridable`: `luit`'s location and your shell depend on which machine you are connected to, so they are configured per machine (per remote), not synced across them.
+
+### Always using luit
+
+To make every terminal go through `luit`, point the default profile at it **and** set an encoding — otherwise you get an encoding picker every time a terminal opens, including on window restore:
+
+```jsonc
+"terminal.integrated.defaultProfile.linux": "luit (choose encoding)",
+"luit.defaultEncoding": "eucJP"
+```
+
+## Known limitations
+
+**Shell integration does not work.** VS Code decides whether to inject its shell integration script by matching the _executable's_ basename against `bash`, `fish`, `pwsh` and `zsh` ([`terminalEnvironment.ts`](https://github.com/microsoft/vscode/blob/main/src/vs/platform/terminal/node/terminalEnvironment.ts)). Here the executable is `luit`, so injection never happens and command decorations, command navigation, IntelliSense, Run Recent Command, cwd detection, sticky scroll and quick fixes are all unavailable. Sourcing the script manually from your shell's rc file may restore it, but that is untested and unsupported in this version:
+
+```bash
+[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path bash)"
+```
+
+**Cancelling the picker.** Dismissing the encoding picker simply opens no terminal. VS Code has no clean way for a profile provider to say "the user cancelled" — see the comment on `SilentCancellation` in `src/terminalProfile.ts` for what it does instead and why.
+
+**Encoding names are not validated.** A name that `luit` does not recognize is passed through as-is; `luit`'s own error appears in the terminal.
+
+**No permanent profile is written.** This extension opens terminals; it never edits `terminal.integrated.profiles.*`. Use `luit.defaultEncoding` to pin an encoding.
+
+**Linux extension hosts only.** There is no native Windows build of `luit`, and macOS availability is unverified.
+
+**Tasks.** VS Code does not await the profile provider when a contributed profile is used for a task's custom execution ([microsoft/vscode#200558](https://github.com/microsoft/vscode/issues/200558)). Set `luit.defaultEncoding` so no picker is needed on that path.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+`luit` itself is a separate program distributed under the MIT/X11 license; this extension does not bundle it.

@@ -1,0 +1,10 @@
+{
+  "luit.openTerminal.title": "Open Terminal...",
+  "luit.refreshEncodings.title": "Refresh Encoding List",
+  "luit.profile.title": "luit (choose encoding)",
+  "luit.luitPath.markdownDescription": "Path to the `luit` executable. Leave empty to search `PATH` automatically.",
+  "luit.defaultEncoding.markdownDescription": "Encoding to use without prompting (for example `eucJP`). Leave empty to choose an encoding every time from `luit -list`.\n\nSet this when you point `#terminal.integrated.defaultProfile.linux#` at the luit profile, otherwise every terminal you open shows the encoding picker.",
+  "luit.shellPath.markdownDescription": "Shell to run inside `luit`. Leave empty to use `$SHELL`, falling back to `bash`.",
+  "luit.shellArgs.markdownDescription": "Arguments passed to the shell specified by `#luit.shellPath#`.",
+  "luit.rememberLastEncoding.description": "Show the last used encoding at the top of the encoding picker."
+}

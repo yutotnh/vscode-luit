@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "yutotnh"
+    ignore:
+      # @types/nodeは実行時のExtension Host(engines.vscode: "^1.74.0"が
+      # バンドルするElectron 19のNode.js v16.14.2)ではなく、.nvmrc
+      # (microsoft/vscode自身の開発用Node.js。src/test/runTest.tsもこちらで動く)に
+      # 追従させる。Extension Hostのfloorへ固定しようとすると、runTest.tsが使う
+      # Node 18.3+のnode:util.parseArgsの型が無くて壊れる。
+      # 実行時floorとのずれはeslint.config.jsのeslint-plugin-n
+      # (n/no-unsupported-features/*、src/**/*.tsは>=16.14.2、runTest.tsのみ
+      # >=18.3.0)が検知するため、@types/nodeは安全に.nvmrcへ追従できる。
+      # メジャーのみignoreする(パッチ/マイナーは追従させ、ルールが陳腐化しないように
+      # する)。.nvmrcのメジャーを上げる際はこのルールとeslint-plugin-nのバージョン
+      # 範囲も見直す。
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+      # @types/vscodeはpackage.jsonのengines.vscodeに固定する。vsceはengines.vscode
+      # より新しい@types/vscodeでのパッケージングを拒否するし、型だけ先行させると
+      # 未対応の古いVS Codeに存在しないAPIを使ってしまいかねない。engines.vscodeを
+      # 上げる時だけ一緒に上げる。
+      - dependency-name: "@types/vscode"
+
+      # TypeScript 7(ネイティブ実装の"tsgo")は@typescript-eslintの対応バージョン
+      # 上限を超えているため、6.x系に留める。対応メジャーが出たら外す。
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    reviewers:
+      - "yutotnh"

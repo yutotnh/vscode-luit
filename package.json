@@ -1,0 +1,135 @@
+{
+  "name": "luit",
+  "displayName": "luit",
+  "description": "Open integrated terminals that speak legacy encodings (EUC-JP, Shift_JIS, ...) through luit",
+  "version": "0.1.0",
+  "publisher": "yutotnh",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "terminal",
+    "encoding",
+    "luit",
+    "EUC-JP",
+    "Shift_JIS"
+  ],
+  "bugs": {
+    "url": "https://github.com/yutotnh/vscode-luit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yutotnh/vscode-luit.git"
+  },
+  "homepage": "https://github.com/yutotnh/vscode-luit",
+  "license": "MIT",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "onTerminalProfile:luit.profile"
+  ],
+  "main": "./dist/extension.js",
+  "l10n": "./l10n",
+  "contributes": {
+    "commands": [
+      {
+        "category": "luit",
+        "command": "luit.openTerminal",
+        "title": "%luit.openTerminal.title%"
+      },
+      {
+        "category": "luit",
+        "command": "luit.refreshEncodings",
+        "title": "%luit.refreshEncodings.title%"
+      }
+    ],
+    "terminal": {
+      "profiles": [
+        {
+          "id": "luit.profile",
+          "title": "%luit.profile.title%",
+          "icon": "terminal"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "luit",
+      "properties": {
+        "luit.luitPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "%luit.luitPath.markdownDescription%"
+        },
+        "luit.defaultEncoding": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "%luit.defaultEncoding.markdownDescription%"
+        },
+        "luit.shellPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine-overridable",
+          "markdownDescription": "%luit.shellPath.markdownDescription%"
+        },
+        "luit.shellArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "--login"
+          ],
+          "scope": "machine-overridable",
+          "markdownDescription": "%luit.shellArgs.markdownDescription%"
+        },
+        "luit.rememberLastEncoding": {
+          "type": "boolean",
+          "default": true,
+          "scope": "machine-overridable",
+          "description": "%luit.rememberLastEncoding.description%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:package": "vsce package",
+    "vscode:prepublish": "npm run package",
+    "vscode:publish": "vsce publish --githubBranch v$npm_package_version",
+    "vscode:publish-ovsx": "ovsx publish --baseContentUrl https://github.com/yutotnh/vscode-luit/blob/v$npm_package_version --baseImagesUrl https://github.com/yutotnh/vscode-luit/raw/v$npm_package_version",
+    "compile": "tsc -p tsconfig.build.json",
+    "watch": "tsc -p tsconfig.build.json -w",
+    "package": "tsc -p tsconfig.build.json",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --max-warnings 0",
+    "format": "prettier --write .",
+    "format-check": "prettier --check .",
+    "test": "node ./out/test/runTest.js",
+    "spellcheck": "cspell ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "@types/vscode": "1.74.0",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^3.9.2",
+    "cspell": "^10.0.1",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-n": "^18.2.2",
+    "mocha": "^11.7.6",
+    "ovsx": "^1.0.2",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
+  }
+}

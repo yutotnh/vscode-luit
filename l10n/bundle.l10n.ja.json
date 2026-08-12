@@ -1,0 +1,18 @@
+{
+  "luit only works when the extension host runs on Linux (local Linux, Remote - SSH, WSL, or a Dev Container). Detected: {0}": "luit が使えるのは拡張機能ホストが Linux で動作している場合のみです (ローカルの Linux、Remote - SSH、WSL、Dev Container)。検出されたプラットフォーム: {0}",
+  "Could not run the luit specified by luit.luitPath ('{0}').": "luit.luitPath で指定された luit ('{0}') を実行できませんでした。",
+  "luit was not found on PATH.": "PATH 上に luit が見つかりませんでした。",
+  "Open Settings": "設定を開く",
+  "Show Install Instructions": "インストール手順を表示",
+  "Install luit with your package manager:": "パッケージマネージャーで luit をインストールしてください:",
+  "luit: Encoding": "luit: エンコーディング",
+  "Select the encoding to translate": "変換するエンコーディングを選択してください",
+  "Could not read the encoding list from luit. Enter an encoding name (for example eucJP).": "luit からエンコーディングの一覧を取得できませんでした。エンコーディング名を入力してください (例: eucJP)。",
+  "Enter an encoding name (for example eucJP).": "エンコーディング名を入力してください (例: eucJP)。",
+  "Recently used": "最近使用したもの",
+  "All encodings": "すべてのエンコーディング",
+  "non-ISO-2022": "非 ISO-2022",
+  "$(edit) Enter an encoding name...": "$(edit) エンコーディング名を入力...",
+  "Could not read the encoding list from luit.": "luit からエンコーディングの一覧を取得できませんでした。",
+  "luit reported {0} encodings.": "luit は {0} 件のエンコーディングを認識しています。"
+}

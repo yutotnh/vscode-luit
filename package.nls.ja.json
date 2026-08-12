@@ -1,0 +1,10 @@
+{
+  "luit.openTerminal.title": "ターミナルを開く...",
+  "luit.refreshEncodings.title": "エンコーディング一覧を再取得",
+  "luit.profile.title": "luit (エンコーディングを選択)",
+  "luit.luitPath.markdownDescription": "`luit` 実行ファイルのパス。空欄の場合は `PATH` から自動的に検索します。",
+  "luit.defaultEncoding.markdownDescription": "毎回選択せずに使うエンコーディング (例: `eucJP`)。空欄の場合は毎回 `luit -list` から選びます。\n\n`#terminal.integrated.defaultProfile.linux#` に luit のプロファイルを指定する場合は、この設定も指定してください。指定しないと、ターミナルを開くたびにエンコーディングの選択が表示されます。",
+  "luit.shellPath.markdownDescription": "`luit` の中で実行するシェル。空欄の場合は `$SHELL` (無ければ `bash`) を使います。",
+  "luit.shellArgs.markdownDescription": "`#luit.shellPath#` で指定したシェルに渡す引数。",
+  "luit.rememberLastEncoding.description": "エンコーディングの選択時に、直近使用したものを一覧の先頭に表示します。"
+}

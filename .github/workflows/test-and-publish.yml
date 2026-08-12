@@ -1,0 +1,76 @@
+name: "Test & Publish"
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - "main"
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  test-and-publish:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ./.nvmrc
+      - run: npm install
+      - run: xvfb-run -a npm test
+        if: runner.os == 'Linux'
+      - run: npm test
+        if: runner.os != 'Linux'
+      - name: Publish
+        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        run: npm run vscode:publish
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Publish to Open VSX
+        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        run: npm run vscode:publish-ovsx
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        continue-on-error: true
+      - name: Create package
+        run: npm run vscode:package
+      - name: Release
+        if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
+        uses: softprops/action-gh-release@v3
+        with:
+          files: luit-*.vsix
+
+  # engines.vscode (1.74.0) is the oldest VS Code this extension claims to
+  # support, and it is also the release where implicit command activation
+  # landed. activationEvents only declares onTerminalProfile, so if that floor
+  # is wrong the commands silently fail to activate the extension -- which only
+  # shows up when actually running against 1.74.0.
+  test-minimum-vscode-version:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        vscode-version: ["1.74.0"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: ./.nvmrc
+      - run: npm install
+      - run: xvfb-run -a npm test -- --vscode-version ${{ matrix.vscode-version }}
+        if: runner.os == 'Linux'
+      - run: npm test -- --vscode-version ${{ matrix.vscode-version }}
+        if: runner.os != 'Linux'
+        shell: bash
