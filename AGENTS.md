@@ -13,6 +13,9 @@ vscode-luitは単一パッケージのTypeScript製VS Code拡張機能。`luit`�
 - **プロファイルの`title`は意図的にローカライズしていない**。`terminal.integrated.defaultProfile.*`は`contributedProfiles.find(p => p.title === 設定値)`で照合する(1.74.0/1.133.0の両方で確認)。翻訳すると、ユーザーがsettings.jsonに書くべき値が表示言語によって変わってしまう
 - **luitはシェルのロケールを変更しない**。`-encoding eucJP`を指定しても子プロセスの`LANG`はそのまま。シェルがUTF-8を出力する設定のままだと文字化けするため、`luit.env`で`LANG`を渡せるようにしてある
 - **エンコーディング一覧はハードコードしない**。`luit -list`の「Known locale encodings:」セクションを実行時に解析する。「Known charsets」以降は文字集合であってエンコーディングではないので取り込まないこと(`luit -encoding`に渡すと失敗する)
+- **エンコーディングの表記はVS Code流に寄せるが、ローカライズはしない**(`src/encodingNames.ts`)。luitは`eucJP`、VS Codeは`Japanese (EUC-JP)`と綴るので、表示はVS Code側に合わせ、luitの名前は`description`に添える。ただし**この表はラベルを被せるためだけのもの**で、何が使えるかの正は常に`luit -list`側にある。翻訳しない理由は2つ: 表示言語によってターミナル名や`luit.defaultEncoding`に書くべき値が変わってしまうこと(プロファイルの`title`と同じ理由)と、**VS Code自身がこの表をローカライズしていない**こと(同じバンドル内でterminal拡張ポイントのスキーマは`localize()`経由なのに、`SUPPORTED_ENCODINGS`は`labelLong:"Japanese (EUC-JP)"`とリテラルで埋まっている)
+- **`contributes.terminal.profiles[].icon`にはcodicon IDしか実質使えない**。相対パスを書いても、VS Codeは文字列をcodicon IDとして照合し、外れると`URI.parse(icon)`にそのまま渡すだけで拡張機能のインストール先を基準に解決しない([terminalIcon.ts `getUriClasses`](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/terminal/browser/terminalIcon.ts)、[terminalExtensionPoints.ts](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/terminal/common/terminalExtensionPoints.ts))。独自の画像をタブに出したいなら`contributes.icons`でwoff2のグリフとして登録する必要がある。`package.json`と`createTerminal`でIDが二重管理にならないよう、値は`src/contributions.ts`に集約してある
+- **ビルドは開発時と配布時で使い分けている**。`watch`はtscで`dist/`に個別の`.js`を吐き、`package`はesbuildで1本に束ねる。`.vscode/tasks.json`が`npm: watch`を`$tsc-watch`前提の背景タスクとして登録し、`launch.json`がそれを`preLaunchTask`にしているため、`watch`をesbuildに替えるならproblemMatcherも一緒に用意すること。また**esbuildは型を見ない**ので、`check-types`(`tsc --noEmit`)を`compile`/`package`の前段から外さないこと。外すとstrict設定一式がビルド時に効かなくなる
 
 ## CHANGELOG.md
 

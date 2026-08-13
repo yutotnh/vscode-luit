@@ -7,6 +7,7 @@ suite("buildLuitTerminalOptions", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "bash", args: ["--login"] },
     });
 
@@ -25,6 +26,7 @@ suite("buildLuitTerminalOptions", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "/usr/bin/luit",
       encoding: "SJIS",
+      encodingLabel: "Shift JIS",
       shell: { path: "/bin/sh", args: [] },
     });
 
@@ -40,10 +42,30 @@ suite("buildLuitTerminalOptions", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "/usr/bin/zsh", args: [] },
     });
 
-    assert.strictEqual(options.name, "zsh (eucJP via luit)");
+    assert.strictEqual(options.name, "zsh (EUC-JP via luit)");
+  });
+
+  test("表示にはencodingLabel、luitへの引数にはencodingを使う", () => {
+    // 表記の統一は見た目だけの話で、luitに渡せるのはluit自身の名前だけ
+    const options = buildLuitTerminalOptions({
+      luitPath: "luit",
+      encoding: "SJIS",
+      encodingLabel: "Shift JIS",
+      shell: { path: "bash", args: ["--login"] },
+    });
+
+    assert.strictEqual(options.name, "bash (Shift JIS via luit)");
+    assert.deepStrictEqual(options.shellArgs, [
+      "-encoding",
+      "SJIS",
+      "--",
+      "bash",
+      "--login",
+    ]);
   });
 });
 
@@ -54,6 +76,7 @@ suite("buildLuitTerminalOptions env", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "bash", args: [] },
     });
 
@@ -65,6 +88,7 @@ suite("buildLuitTerminalOptions env", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "bash", args: [] },
       env: {},
     });
@@ -78,6 +102,7 @@ suite("buildLuitTerminalOptions env", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "bash", args: [] },
       env: { LANG: "ja_JP.eucJP" },
     });
@@ -90,6 +115,7 @@ suite("buildLuitTerminalOptions env", () => {
     const options = buildLuitTerminalOptions({
       luitPath: "luit",
       encoding: "eucJP",
+      encodingLabel: "EUC-JP",
       shell: { path: "bash", args: [] },
       env,
     });

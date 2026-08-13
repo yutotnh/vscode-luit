@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Diagnostics } from "./diagnostics";
+import { describeEncoding, resolveEncodingId } from "./encodingNames";
 import { EncodingListCache, LuitEncoding } from "./luitEncodingList";
 import { resolveLuitPath } from "./luitPath";
 import { detectHostPlatform } from "./platform";
@@ -69,6 +70,7 @@ export async function prepareLuitTerminal(
   const options = buildLuitTerminalOptions({
     luitPath: location.path,
     encoding,
+    encodingLabel: describeEncoding(encoding).shortLabel,
     shell,
     env: config.get<Record<string, string | null>>("env", {}),
   });
@@ -94,26 +96,39 @@ async function pickEncoding(
   luitPath: string,
   config: vscode.WorkspaceConfiguration,
 ): Promise<string | undefined> {
-  const defaultEncoding = config.get<string>("defaultEncoding", "");
-  if (defaultEncoding) {
-    return defaultEncoding;
-  }
-
   const rememberLast = config.get<boolean>("rememberLastEncoding", true);
   const lastEncoding = rememberLast ? deps.state.getLastEncoding() : undefined;
 
+  // 一覧の取得は`defaultEncoding`の判定より前に置く。設定に書かれた名前を
+  // luitに渡せる名前へ寄せるのに一覧が要るため。UIは出ないので操作は増えず、
+  // 一覧はキャッシュされるのでプロセスの起動は最初の1回だけ
   const list = await deps.encodingCache.get(luitPath);
+  if (!list.ok) {
+    deps.diagnostics.log(`Could not list encodings: ${list.reason}`);
+  }
+  const known = list.ok ? list.encodings : [];
+
+  const defaultEncoding = config.get<string>("defaultEncoding", "");
+  if (defaultEncoding) {
+    return resolveEncodingId(defaultEncoding, known);
+  }
+
+  // 一覧を取れなかった場合の手動入力への切り替えは、`defaultEncoding`の判定より
+  // 後で行う。先に判定すると、`defaultProfile.linux`をこのプロファイルに向けて
+  // `defaultEncoding`で固定しているユーザーが、`luit -list`が失敗したというだけで
+  // ターミナルを開くたびに入力を求められてしまう
   if (!list.ok) {
     // 一覧を取れなくても、エンコーディング名さえ分かっていれば起動はできる。
     // 通知は出さず、詳細は出力チャネルに残して手動入力に切り替える
-    deps.diagnostics.log(`Could not list encodings: ${list.reason}`);
-    return await vscode.window.showInputBox({
-      title: vscode.l10n.t("luit: Encoding"),
-      prompt: vscode.l10n.t(
-        "Could not read the encoding list from luit. Enter an encoding name (for example eucJP).",
-      ),
-      value: lastEncoding ?? "",
-    });
+    return normalize(
+      await vscode.window.showInputBox({
+        title: vscode.l10n.t("luit: Encoding"),
+        prompt: vscode.l10n.t(
+          "Could not read the encoding list from luit. Enter an encoding name (for example eucJP).",
+        ),
+        value: lastEncoding ?? "",
+      }),
+    );
   }
 
   const items = buildQuickPickItems(list.encodings, lastEncoding);
@@ -128,13 +143,20 @@ async function pickEncoding(
   }
 
   if (selected.encoding === undefined) {
-    return await vscode.window.showInputBox({
-      title: vscode.l10n.t("luit: Encoding"),
-      prompt: vscode.l10n.t("Enter an encoding name (for example eucJP)."),
-    });
+    return normalize(
+      await vscode.window.showInputBox({
+        title: vscode.l10n.t("luit: Encoding"),
+        prompt: vscode.l10n.t("Enter an encoding name (for example eucJP)."),
+      }),
+    );
   }
 
   return selected.encoding;
+
+  /** 手動入力された名前をluitに渡せる名前へ寄せる。中断(undefined)はそのまま通す */
+  function normalize(input: string | undefined): string | undefined {
+    return input === undefined ? undefined : resolveEncodingId(input, known);
+  }
 }
 
 /** QuickPickの項目。`encoding`が`undefined`の項目は「手動入力」を意味する */
@@ -145,6 +167,11 @@ interface EncodingQuickPickItem extends vscode.QuickPickItem {
 /**
  * エンコーディング一覧をQuickPickの項目に変換する
  *
+ * 表に出すのはVS Code流の表記(`Japanese (EUC-JP)`)で、luitの名前(`eucJP`)は
+ * `description`に添える。`luit -encoding`と`luit.defaultEncoding`に渡せるのは
+ * luitの名前だけなので、選ぶときに見えていないと設定に書き写せない。
+ * `matchOnDescription`と併せて、どちらの表記でも絞り込めるようにしてある。
+ *
  * 並び順は`luit -list`の出力のまま。よく使うものを拡張機能側で決め打ちすると、
  * luitのバージョンや環境によって実際に使える一覧とズレる
  */
@@ -154,14 +181,14 @@ function buildQuickPickItems(
 ): EncodingQuickPickItem[] {
   const items: EncodingQuickPickItem[] = [];
 
-  const isKnown = encodings.some((entry) => entry.id === lastEncoding);
-  if (lastEncoding !== undefined && isKnown) {
+  const last = encodings.find((entry) => entry.id === lastEncoding);
+  if (last) {
     items.push(
       {
         label: vscode.l10n.t("Recently used"),
         kind: vscode.QuickPickItemKind.Separator,
       },
-      { label: lastEncoding, encoding: lastEncoding },
+      toItem(last),
       {
         label: vscode.l10n.t("All encodings"),
         kind: vscode.QuickPickItemKind.Separator,
@@ -170,16 +197,7 @@ function buildQuickPickItems(
   }
 
   for (const entry of encodings) {
-    // exactOptionalPropertyTypes のため、description は値がある場合のみ持たせる
-    items.push(
-      entry.isoType === "non-iso-2022"
-        ? {
-            label: entry.id,
-            description: vscode.l10n.t("non-ISO-2022"),
-            encoding: entry.id,
-          }
-        : { label: entry.id, encoding: entry.id },
-    );
+    items.push(toItem(entry));
   }
 
   items.push(
@@ -188,6 +206,19 @@ function buildQuickPickItems(
   );
 
   return items;
+
+  function toItem(entry: LuitEncoding): EncodingQuickPickItem {
+    const description =
+      entry.isoType === "non-iso-2022"
+        ? `${entry.id} · ${vscode.l10n.t("non-ISO-2022")}`
+        : entry.id;
+
+    return {
+      label: describeEncoding(entry.id).label,
+      description,
+      encoding: entry.id,
+    };
+  }
 }
 
 /**

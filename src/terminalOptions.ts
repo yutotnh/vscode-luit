@@ -4,7 +4,15 @@ import { ShellSpec } from "./shellResolution";
 /** ターミナルを起動するために必要な情報 */
 export interface BuildLuitTerminalOptionsInput {
   luitPath: string;
+  /** `luit -encoding`にそのまま渡す値。例: "eucJP" */
   encoding: string;
+  /**
+   * ターミナル名に出す表記。例: "EUC-JP"
+   *
+   * VS Code流の表記(`encodingNames.ts`)を呼び出し側で解決して渡してもらう。
+   * この関数は起動コマンドの組み立てだけを持つため、表示の都合をここに持ち込まない
+   */
+  encodingLabel: string;
   shell: ShellSpec;
   /**
    * ターミナルに渡す環境変数
@@ -44,10 +52,10 @@ export interface LuitTerminalOptions {
 export function buildLuitTerminalOptions(
   input: BuildLuitTerminalOptionsInput,
 ): LuitTerminalOptions {
-  const { luitPath, encoding, shell, env } = input;
+  const { luitPath, encoding, encodingLabel, shell, env } = input;
 
   const options: LuitTerminalOptions = {
-    name: `${path.basename(shell.path)} (${encoding} via luit)`,
+    name: `${path.basename(shell.path)} (${encodingLabel} via luit)`,
     shellPath: luitPath,
     shellArgs: ["-encoding", encoding, "--", shell.path, ...shell.args],
   };

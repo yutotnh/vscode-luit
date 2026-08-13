@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { TERMINAL_ICON_ID } from "./contributions";
 import { resolveLuitPath } from "./luitPath";
 import { detectHostPlatform } from "./platform";
 import { prepareLuitTerminal, TerminalProfileDeps } from "./terminalProfile";
@@ -31,7 +32,7 @@ export function registerCommands(
       vscode.window
         .createTerminal({
           ...result.options,
-          iconPath: new vscode.ThemeIcon("terminal"),
+          iconPath: new vscode.ThemeIcon(TERMINAL_ICON_ID),
         })
         .show();
     }),

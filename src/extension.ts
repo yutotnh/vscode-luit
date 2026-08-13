@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { registerCommands } from "./commands";
+import { TERMINAL_PROFILE_ID } from "./contributions";
 import { createDiagnostics } from "./diagnostics";
 import { createEncodingListCache } from "./luitEncodingList";
 import { createState } from "./state";
@@ -8,8 +9,7 @@ import {
   TerminalProfileDeps,
 } from "./terminalProfile";
 
-/** `package.json`の`contributes.terminal.profiles[].id`と一致させる */
-export const TERMINAL_PROFILE_ID = "luit.profile";
+export { TERMINAL_PROFILE_ID };
 
 export function activate(context: vscode.ExtensionContext): void {
   const output = vscode.window.createOutputChannel("luit");

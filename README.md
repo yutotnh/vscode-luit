@@ -43,14 +43,14 @@ The locale has to exist on that machine (`locale -a` lists the installed ones).
 
 ## Settings
 
-| Setting                     | Default       | Description                                                               |
-| --------------------------- | ------------- | ------------------------------------------------------------------------- |
-| `luit.luitPath`             | `""`          | Path to the `luit` executable. Empty searches `PATH`.                     |
-| `luit.defaultEncoding`      | `""`          | Use this encoding without prompting. Empty asks every time.               |
-| `luit.shellPath`            | `""`          | Shell to run inside `luit`. Empty uses `$SHELL`, then `bash`.             |
-| `luit.shellArgs`            | `["--login"]` | Arguments passed to that shell.                                           |
-| `luit.env`                  | `{}`          | Environment variables for the terminal. Use it to set `LANG` (see above). |
-| `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.                     |
+| Setting                     | Default       | Description                                                                                                                            |
+| --------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `luit.luitPath`             | `""`          | Path to the `luit` executable. Empty searches `PATH`.                                                                                  |
+| `luit.defaultEncoding`      | `""`          | Use this encoding without prompting. Empty asks every time. VS Code's spelling works too (`EUC-JP`, `Shift_JIS`, `Japanese (EUC-JP)`). |
+| `luit.shellPath`            | `""`          | Shell to run inside `luit`. Empty uses `$SHELL`, then `bash`.                                                                          |
+| `luit.shellArgs`            | `["--login"]` | Arguments passed to that shell.                                                                                                        |
+| `luit.env`                  | `{}`          | Environment variables for the terminal. Use it to set `LANG` (see above).                                                              |
+| `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.                                                                                  |
 
 All settings are `machine-overridable`: `luit`'s location and your shell depend on which machine you are connected to, so they are configured per machine (per remote), not synced across them.
 
@@ -75,7 +75,7 @@ To make every terminal go through `luit`, point the default profile at it **and*
 
 **Cancelling the picker.** Dismissing the encoding picker simply opens no terminal. VS Code has no clean way for a profile provider to say "the user cancelled" — see the comment on `SilentCancellation` in `src/terminalProfile.ts` for what it does instead and why.
 
-**Encoding names are not validated.** A name that `luit` does not recognize is passed through as-is; `luit`'s own error appears in the terminal.
+**Encoding names are not validated.** The picker shows VS Code's spelling (`Japanese (EUC-JP)`) with `luit`'s own name next to it (`eucJP`), and either spelling is accepted in `luit.defaultEncoding`. But a name that resolves to nothing is passed through as-is; `luit`'s own error then appears in the terminal.
 
 **No permanent profile is written.** This extension opens terminals; it never edits `terminal.integrated.profiles.*`. Use `luit.defaultEncoding` to pin an encoding.
 

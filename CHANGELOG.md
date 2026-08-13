@@ -18,3 +18,5 @@ Dependency bumps and internal-only changes are out of scope.
 - Settings for the `luit` path, default encoding, wrapped shell and its arguments.
 - `luit.env` for setting environment variables (notably `LANG`) on these terminals: `luit` does not change the shell's locale, so the shell must already emit the selected encoding.
 - Japanese localization.
+- Show encodings the way VS Code spells them. The picker lists `Japanese (EUC-JP)` with `luit`'s own name (`eucJP`) beside it, both are searchable, and terminals are named `bash (EUC-JP via luit)`.
+- Accept VS Code's spelling in `luit.defaultEncoding`. `EUC-JP`, `Shift_JIS` and `Japanese (EUC-JP)` all resolve to the name `luit` expects.
