@@ -20,3 +20,5 @@ Dependency bumps and internal-only changes are out of scope.
 - Japanese localization.
 - Show encodings the way VS Code spells them. The picker lists `Japanese (EUC-JP)` with `luit`'s own name (`eucJP`) beside it, both are searchable, and terminals are named `bash (EUC-JP via luit)`.
 - Accept VS Code's spelling in `luit.defaultEncoding`. `EUC-JP`, `Shift_JIS` and `Japanese (EUC-JP)` all resolve to the name `luit` expects.
+- Settings now travel with Settings Sync and appear in User settings while connected to a remote, without losing per-remote or per-workspace overrides. `luit.luitPath` and `luit.shellPath` stay out of sync by default because a path is machine specific; add `"-luit.luitPath"` to `settingsSync.ignoredSettings` to sync them anyway.
+- Settings that name a program to execute (`luit.luitPath`, `luit.shellPath`, `luit.shellArgs`, `luit.env`) are no longer read from workspace settings in an untrusted workspace.

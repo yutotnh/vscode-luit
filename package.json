@@ -30,6 +30,17 @@
   "extensionKind": [
     "workspace"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "restrictedConfigurations": [
+        "luit.luitPath",
+        "luit.shellPath",
+        "luit.shellArgs",
+        "luit.env"
+      ]
+    }
+  },
   "activationEvents": [
     "onTerminalProfile:luit.profile"
   ],
@@ -63,19 +74,21 @@
         "luit.luitPath": {
           "type": "string",
           "default": "",
-          "scope": "machine-overridable",
+          "scope": "window",
+          "ignoreSync": true,
           "markdownDescription": "%luit.luitPath.markdownDescription%"
         },
         "luit.defaultEncoding": {
           "type": "string",
           "default": "",
-          "scope": "machine-overridable",
+          "scope": "window",
           "markdownDescription": "%luit.defaultEncoding.markdownDescription%"
         },
         "luit.shellPath": {
           "type": "string",
           "default": "",
-          "scope": "machine-overridable",
+          "scope": "window",
+          "ignoreSync": true,
           "markdownDescription": "%luit.shellPath.markdownDescription%"
         },
         "luit.shellArgs": {
@@ -86,7 +99,7 @@
           "default": [
             "--login"
           ],
-          "scope": "machine-overridable",
+          "scope": "window",
           "markdownDescription": "%luit.shellArgs.markdownDescription%"
         },
         "luit.env": {
@@ -98,13 +111,13 @@
             ]
           },
           "default": {},
-          "scope": "machine-overridable",
+          "scope": "window",
           "markdownDescription": "%luit.env.markdownDescription%"
         },
         "luit.rememberLastEncoding": {
           "type": "boolean",
           "default": true,
-          "scope": "machine-overridable",
+          "scope": "window",
           "description": "%luit.rememberLastEncoding.description%"
         }
       }

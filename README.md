@@ -52,7 +52,11 @@ The locale has to exist on that machine (`locale -a` lists the installed ones).
 | `luit.env`                  | `{}`          | Environment variables for the terminal. Use it to set `LANG` (see above).                                                              |
 | `luit.rememberLastEncoding` | `true`        | Show the last used encoding at the top of the picker.                                                                                  |
 
-All settings are `machine-overridable`: `luit`'s location and your shell depend on which machine you are connected to, so they are configured per machine (per remote), not synced across them.
+All settings are `window` scoped, so they can be set in User settings and travel with Settings Sync, and can still be overridden per remote and per workspace — `luit`'s location and your shell depend on which machine you are connected to.
+
+`luit.luitPath` and `luit.shellPath` are excluded from Settings Sync by default, since a path that exists on one machine may not exist on another. To sync them anyway, add `"-luit.luitPath"` to `settingsSync.ignoredSettings`.
+
+`luit.luitPath`, `luit.shellPath`, `luit.shellArgs` and `luit.env` name a program to execute, so they are not read from workspace settings in an [untrusted workspace](https://code.visualstudio.com/docs/editing/workspaces/workspace-trust) — the same treatment VS Code gives `terminal.integrated.profiles.*`.
 
 ### Always using luit
 
