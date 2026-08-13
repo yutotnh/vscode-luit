@@ -14,6 +14,12 @@ permissions:
   contents: write
 
 jobs:
+  # This extension only supports Linux extension hosts, but the non-Linux
+  # runners are kept here on purpose: they are the only place where the
+  # unsupported-host path a Windows/macOS user actually hits gets exercised.
+  # See the non-Linux cases in platform.test.ts and extension.test.ts -- if
+  # those go away, these runners should go away with them. Other jobs are
+  # Linux-only because they have no OS-dependent signal at all.
   test-and-publish:
     strategy:
       matrix:
@@ -43,6 +49,7 @@ jobs:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
         continue-on-error: true
       - name: Create package
+        if: matrix.os == 'ubuntu-latest'
         run: npm run vscode:package
       - name: Release
         if: success() && startsWith(github.ref, 'refs/tags/') && matrix.os == 'ubuntu-latest'
@@ -55,12 +62,15 @@ jobs:
   # landed. activationEvents only declares onTerminalProfile, so if that floor
   # is wrong the commands silently fail to activate the extension -- which only
   # shows up when actually running against 1.74.0.
+  #
+  # Linux only: what this guards is a VS Code version floor, not an OS
+  # property. Launching a November 2022 Electron on macos-latest (arm64) and
+  # windows-latest adds flake risk without adding signal.
   test-minimum-vscode-version:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
         vscode-version: ["1.74.0"]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -70,7 +80,3 @@ jobs:
           node-version-file: ./.nvmrc
       - run: npm install
       - run: xvfb-run -a npm test -- --vscode-version ${{ matrix.vscode-version }}
-        if: runner.os == 'Linux'
-      - run: npm test -- --vscode-version ${{ matrix.vscode-version }}
-        if: runner.os != 'Linux'
-        shell: bash

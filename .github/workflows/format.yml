@@ -9,11 +9,11 @@ on:
       - "main"
 
 jobs:
+  # prettier は純粋な Node.js プロセスで、OS 差は改行コードだけ。それも
+  # .gitattributes の `* text=auto eol=lf` で固定してあるため、複数 OS で
+  # 回しても得られる信号が無い。
   format:
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7

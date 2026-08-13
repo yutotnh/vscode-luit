@@ -52,7 +52,9 @@ CIの`test-minimum-vscode-version`ジョブが1.74.0で実際にテストを走�
 
 - `vscode`をimportしないテスト(純粋関数、`ExecFileFn`をモックしたもの)も、`vscode`に依存するテストも、同じmochaスイート(`@vscode/test-electron`でExtension Host内実行)で動かす
 - luitが実際にエンコーディングを変換しているかは自動テストの対象外。検証範囲の上限は「正しい`TerminalOptions`が組み立つところまで」
-- 環境によってはVS Codeのバイナリが起動できず`npm test`がローカルで通らないことがある(共有ライブラリ不足、X不在など)。その場合は`tsc` / `eslint` / `prettier` / `cspell`をローカルで、テスト結果はCI(3 OSマトリクス)で確認する旨をPR本文に書く。`vscode`をimportしないテストだけなら`npx mocha --ui tdd out/test/suite/<name>.test.js`で直接実行できる
+- 環境によってはVS Codeのバイナリが起動できず`npm test`がローカルで通らないことがある(共有ライブラリ不足、X不在など)。その場合は`tsc` / `eslint` / `prettier` / `cspell`をローカルで、テスト結果はCIの`test-and-publish`(3 OS)で確認する旨をPR本文に書く。`vscode`をimportしないテストだけなら`npx mocha --ui tdd out/test/suite/<name>.test.js`で直接実行できる
+- **非Linuxランナーを`test-and-publish`にだけ残しているのは意図的**。`detectHostPlatform()`がLinux以外を弾き、`resolveLuitPath()`は非Linuxでプロセスを起動せず即エラーを返すため、放っておくと非Linuxで実行されるのはOS非依存の純粋関数と、OS判定を含まない`activate()`だけになる(= 何も検証していないランナーになる)。それを避けるために`platform.test.ts`の引数なし`detectHostPlatform()`と、`extension.test.ts`の非Linux専用ケース(Linuxでは`this.skip()`)を置いている。**このassertionを消すなら非Linuxランナーも一緒に消すこと。** 逆に`format` / `lint` / `test-minimum-vscode-version`をLinuxのみにしているのも意図的で、OS差の信号が無いため(改行は`.gitattributes`の`* text=auto eol=lf`で固定済み、最小バージョンの検証はVS Codeバージョンの話でOSの性質ではない)
+- **`extension.test.ts`で`luit.openTerminal`を実行するテストは、Linuxでは必ずskipすること**。Linuxかつluitがある環境では`pickEncoding`がQuickPickを開き、応答する人がいないためCIがハングする
 
 ## コミット規約
 
